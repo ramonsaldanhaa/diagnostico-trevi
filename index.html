@@ -828,12 +828,16 @@
 // ══════════════════════════════════════════════
 const SUPA_URL = 'https://ioegepsixxbbdnjjazvp.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvZWdlcHNpeHhiYmRuamphenZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDM2MjMsImV4cCI6MjA5NDIxOTYyM30.xn5oX44qFBF7CWrPB0JvkIHDJiy7sF45gY1qE4KdqgY';
-const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+let supabase = null;
+try {
+  if (window.supabase) supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+} catch(e) { console.warn('Supabase init falhou:', e); }
 
 // ID do registro atual — preenchido após insert do lead
 let currentDiagId = null;
 
 async function dbInsertLead(data) {
+  if (!supabase) return null;
   try {
     const { data: row, error } = await supabase
       .from('diagnosticos')
@@ -846,7 +850,7 @@ async function dbInsertLead(data) {
 }
 
 async function dbUpdateDiag(id, data) {
-  if (!id) return;
+  if (!supabase || !id) return;
   try {
     const { error } = await supabase
       .from('diagnosticos')
