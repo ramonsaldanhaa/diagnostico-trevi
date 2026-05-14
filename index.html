@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Empresarial | Trevi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,600;0,700;1,400&family=Big+Shoulders+Display:wght@700;800&family=Lora:ital,wght@1,400;1,500&family=Josefin+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --verde:        #1A3A2A;
+    --verde-escuro: #162d20;
+    --verde-claro:  #A8D5B5;
+    --offwhite:     #F5F5F5;
+    --offwhite-dk:  #EDE8E0;
+    --preto:        #000000;
+    --white:        #ffffff;
+    --gray-200:     #e9eaec;
+    --gray-300:     #d1d5db;
+    --gray-500:     #6b7280;
+    --gray-700:     #374151;
+    --red:          #dc2626;
+    --yellow:       #d97706;
+    --shadow:       0 4px 24px rgba(26,58,42,0.08);
+    --c-direcao:    #1A3A2A;
+    --c-pessoas:    #2E5E42;
+    --c-operacao:   #4A7C5F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Josefin Sans', system-ui, sans-serif;
+    background: var(--offwhite);
+    color: var(--preto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--verde);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--offwhite);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800; font-size: 17px;
+    color: var(--verde);
+    flex-shrink: 0;
+  }
+  .logo-text {
+    color: var(--offwhite);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 20px; font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  .logo-sub {
+    color: var(--verde-claro);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* ── Progress ── */
+  #progress-wrap {
+    background: var(--verde-escuro);
+    padding: 10px 32px;
+    display: none;
+    align-items: center;
+    gap: 16px;
+  }
+  .progress-label {
+    color: var(--verde-claro);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .progress-bar-bg {
+    flex: 1; height: 3px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 99px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--verde-claro);
+    border-radius: 99px; transition: width 0.5s ease;
+  }
+  .progress-pct {
+    color: var(--white);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 600;
+    min-width: 32px; text-align: right;
+  }
+
+  /* ── Layout ── */
+  main {
+    flex: 1; display: flex;
+    align-items: flex-start; justify-content: center;
+    padding: 48px 16px 64px;
+  }
+  .card {
+    background: var(--white);
+    border: 0.5px solid var(--preto);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    width: 100%; max-width: 740px;
+    overflow: hidden;
+  }
+
+  /* ── Card Header ── */
+  .card-header { background: var(--verde); padding: 36px 40px 28px; }
+  .pillar-tag {
+    display: inline-block;
+    background: rgba(168,213,181,0.12);
+    border: 1px solid var(--verde-claro);
+    color: var(--verde-claro);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .card-header h1 {
+    color: var(--offwhite);
+    font-family: 'Cormorant', serif;
+    font-size: 30px; font-weight: 600;
+    line-height: 1.2; margin-bottom: 10px;
+  }
+  .card-header p {
+    color: var(--verde-claro);
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 14px; line-height: 1.65;
+  }
+  .card-body { padding: 36px 40px; }
+
+  /* ── Welcome ── */
+  .welcome-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px; margin-bottom: 28px;
+  }
+  .pillar-card {
+    border: 0.5px solid var(--preto);
+    border-radius: 4px;
+    padding: 22px 16px;
+    text-align: center;
+    background: var(--offwhite);
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .pillar-card:hover { border-color: var(--verde); transform: translateY(-2px); }
+  .pillar-icon {
+    margin-bottom: 12px;
+    display: flex; justify-content: center;
+  }
+  .pillar-icon svg {
+    width: 26px; height: 26px;
+    stroke: var(--verde); stroke-width: 1.5;
+    fill: none; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .pillar-card h3 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 14px; font-weight: 700;
+    color: var(--verde); margin-bottom: 6px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .pillar-card p {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 12px; color: var(--gray-500); line-height: 1.5;
+  }
+
+  /* ── Forms ── */
+  .form-section-label {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--verde);
+    border-bottom: 1px solid var(--offwhite-dk);
+    padding-bottom: 8px;
+    margin-bottom: 20px; margin-top: 28px;
+  }
+  .form-section-label:first-child { margin-top: 0; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; color: var(--gray-700);
+    margin-bottom: 6px; text-transform: uppercase;
+  }
+  .form-group input,
+  .form-group select {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 4px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 14px; color: var(--preto);
+    background: var(--white);
+    transition: border-color 0.2s; outline: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus { border-color: var(--verde); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ── Questions ── */
+  .question-block {
+    margin-bottom: 32px; padding-bottom: 32px;
+    border-bottom: 1px solid var(--offwhite);
+  }
+  .question-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .q-number {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    color: var(--verde); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .q-text {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 15px; color: var(--preto);
+    line-height: 1.6; margin-bottom: 6px;
+  }
+  .q-sub {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.08em; color: var(--gray-500);
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .likert { display: flex; gap: 8px; flex-wrap: wrap; }
+  .likert input[type="radio"] { display: none; }
+  .likert label {
+    flex: 1; min-width: 52px;
+    padding: 10px 6px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 4px; text-align: center;
+    cursor: pointer;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; color: var(--gray-700);
+    line-height: 1.3; transition: all 0.2s; user-select: none;
+  }
+  .likert label .score-num {
+    display: block;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 22px; font-weight: 800;
+    margin-bottom: 2px; color: var(--verde);
+  }
+  .likert input[type="radio"]:checked + label {
+    background: var(--verde); border-color: var(--verde); color: var(--offwhite);
+  }
+  .likert input[type="radio"]:checked + label .score-num { color: var(--offwhite); }
+  .likert label:hover { border-color: var(--verde); }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 12px; margin-top: 32px; }
+  .btn {
+    padding: 14px 28px; border-radius: 6px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer; border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .btn-primary { background: var(--verde); color: var(--offwhite); flex: 1; }
+  .btn-primary:hover { background: var(--verde-escuro); }
+  .btn-secondary {
+    background: transparent; color: var(--verde);
+    border: 1.5px solid var(--verde);
+  }
+  .btn-secondary:hover { background: var(--verde); color: var(--offwhite); }
+
+  /* ── Results Header ── */
+  .results-header { background: var(--verde); padding: 36px 40px 28px; }
+  .results-header h1 {
+    color: var(--offwhite);
+    font-family: 'Cormorant', serif;
+    font-size: 26px; font-weight: 600; margin-bottom: 4px;
+  }
+  .results-header p {
+    color: var(--verde-claro);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .company-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(168,213,181,0.12);
+    border: 1px solid var(--verde-claro);
+    border-radius: 4px; padding: 6px 12px; margin-bottom: 16px;
+    color: var(--verde-claro);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* ── Score Overview ── */
+  .score-overview {
+    display: grid; grid-template-columns: auto 1fr;
+    gap: 32px; align-items: center; margin-bottom: 32px;
+  }
+  .gauge-wrap { text-align: center; }
+  .gauge-wrap canvas { max-width: 180px; }
+  .gauge-label { margin-top: -40px; }
+  .gauge-score {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 48px; font-weight: 800;
+    color: var(--verde); line-height: 1;
+  }
+  .gauge-max {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; color: var(--gray-500);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .gauge-status {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ── Pillar Results ── */
+  .pillars-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; margin-bottom: 28px;
+  }
+  .pillar-result {
+    border-radius: 4px; padding: 16px;
+    border: 1px solid var(--gray-200);
+    background: var(--offwhite); text-align: center;
+  }
+  .pr-name {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gray-500); margin-bottom: 8px;
+  }
+  .pr-score {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 32px; font-weight: 800;
+    color: var(--verde); line-height: 1;
+  }
+  .pr-max {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 12px; color: var(--gray-500);
+  }
+  .pr-bar-bg {
+    height: 4px; background: var(--gray-200);
+    border-radius: 99px; margin-top: 10px; overflow: hidden;
+  }
+  .pr-bar-fill { height: 100%; border-radius: 99px; }
+
+  /* ── Section Title ── */
+  .section-title {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--verde); margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--offwhite-dk);
+  }
+
+  /* ── Radar ── */
+  .radar-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
+  .radar-wrap canvas { max-width: 340px; max-height: 280px; }
+
+  /* ── Blockers ── */
+  .blockers-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .blocker-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 18px 20px;
+    border-radius: 4px;
+    background: var(--offwhite);
+    border: 0.5px solid var(--gray-200);
+    border-left: 3px solid transparent;
+  }
+  .blocker-item.critical { border-left-color: var(--red); }
+  .blocker-item.warning  { border-left-color: var(--yellow); }
+  .blocker-item.ok       { border-left-color: var(--verde); }
+  .blocker-icon { flex-shrink: 0; margin-top: 2px; }
+  .blocker-icon svg {
+    width: 18px; height: 18px;
+    stroke: var(--verde); stroke-width: 1.5;
+    fill: none; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .blocker-text h4 {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--preto); margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+  .blocker-badge {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-left: 8px;
+  }
+  .blocker-text p {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 13px; color: var(--gray-500); line-height: 1.6;
+  }
+
+  /* ── Recs ── */
+  .recs-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 28px;
+  }
+  .rec-card {
+    background: var(--offwhite);
+    border: 0.5px solid var(--preto);
+    border-radius: 4px; padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .rec-card:hover { border-color: var(--verde); }
+  .rec-card .rec-pillar {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .rec-card h4 {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--preto); margin-bottom: 6px;
+    letter-spacing: 0.01em; line-height: 1.35;
+  }
+  .rec-card p {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 12px; color: var(--gray-500); line-height: 1.6;
+  }
+
+  /* ── Footer ── */
+  .footer-actions {
+    display: flex; gap: 12px;
+    padding: 24px 40px;
+    background: var(--offwhite);
+    border-top: 1px solid var(--gray-200);
+  }
+  .divider { height: 1px; background: var(--offwhite-dk); margin: 28px 0; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── LGPD Consent ── */
+  .consent-block {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--offwhite);
+    border: 1px solid var(--verde);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-top: 24px; margin-bottom: 4px;
+  }
+  .consent-block input[type="checkbox"] {
+    width: 16px; height: 16px;
+    min-width: 16px;
+    accent-color: var(--verde);
+    margin-top: 2px; cursor: pointer;
+  }
+  .consent-block label {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 12px; font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--gray-700); line-height: 1.6;
+    cursor: pointer;
+  }
+  .privacy-link {
+    background: none; border: none; padding: 0;
+    color: var(--verde);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 12px; font-weight: 700;
+    text-decoration: underline; cursor: pointer;
+  }
+  .privacy-link:hover { color: var(--verde-escuro); }
+
+  /* ── Privacy Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--white);
+    border: 0.5px solid var(--preto);
+    border-radius: 4px;
+    max-width: 580px; width: 100%;
+    max-height: 82vh; overflow-y: auto;
+    padding: 40px;
+  }
+  .modal-box h2 {
+    font-family: 'Cormorant', serif;
+    font-size: 24px; font-weight: 600;
+    color: var(--verde); margin-bottom: 6px;
+  }
+  .modal-box .modal-sub {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gray-500); margin-bottom: 28px;
+  }
+  .modal-section { margin-bottom: 22px; }
+  .modal-section h3 {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--verde); margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--offwhite-dk);
+  }
+  .modal-section p, .modal-section li {
+    font-family: 'Lora', serif; font-style: italic;
+    font-size: 13px; color: var(--gray-700); line-height: 1.7;
+  }
+  .modal-section ul { padding-left: 18px; }
+  .modal-section li { margin-bottom: 4px; }
+  .modal-close {
+    display: block; width: 100%; margin-top: 28px;
+    padding: 12px; border-radius: 6px;
+    background: var(--verde); color: var(--offwhite);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; cursor: pointer;
+  }
+  .modal-close:hover { background: var(--verde-escuro); }
+
+  /* ── Weight badge ── */
+  .weight-badge {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gray-500); margin-top: 2px;
+  }
+
+  @media print {
+    header, #progress-wrap, .footer-actions, .btn { display: none !important; }
+    body { background: white; }
+    .card { box-shadow: none; max-width: 100%; border: none; }
+  }
+  @media (max-width: 600px) {
+    .card-header, .card-body { padding: 24px 20px; }
+    .welcome-grid, .pillars-grid, .recs-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .score-overview { grid-template-columns: 1fr; text-align: center; }
+    .footer-actions { flex-direction: column; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">T</div>
+  <div>
+    <div class="logo-text">trevi</div>
+    <div class="logo-sub">Diagnóstico Empresarial</div>
+  </div>
+</header>
+
+<div id="progress-wrap">
+  <span class="progress-label" id="progress-label">Etapa 1 de 4</span>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <span class="progress-pct" id="progress-pct">0%</span>
+</div>
+
+<main><div class="card">
+
+  <!-- ══ SCREEN 0: Welcome ══ -->
+  <div class="screen active" id="screen-0">
+    <div class="card-header">
+      <div class="pillar-tag">Trevi · Diagnóstico Empresarial</div>
+      <h1>Descubra o que está travando o crescimento da sua empresa</h1>
+      <p>Uma avaliação estruturada dos três pilares que sustentam o crescimento com margem. Ao final, você recebe o diagnóstico dos principais bloqueadores e um plano de ação priorizado.</p>
+    </div>
+    <div class="card-body">
+      <div class="welcome-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          </div>
+          <h3>Direção</h3>
+          <p>Visão, estratégia, precificação e liderança que escala sem depender de uma pessoa</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Pessoas</h3>
+          <p>Time, cultura, comunicação e rituais de gestão que retêm e desenvolvem talentos</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+          </div>
+          <h3>Operação</h3>
+          <p>Retenção, churn, LTV e processos que geram caixa de forma previsível</p>
+        </div>
+      </div>
+      <p style="font-family:'Lora',serif;font-style:italic;font-size:14px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;">Responda <strong>15 perguntas</strong> (5 por pilar) em escala de 1 a 5. O diagnóstico identifica os principais bloqueadores de crescimento e entrega recomendações priorizadas para cada pilar.</p>
+      <p style="font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--gray-500);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Tempo estimado: 5 a 10 minutos</p>
+      <div class="btn-row"><button class="btn btn-primary" onclick="goTo(1)">Começar diagnóstico</button></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 1: Info ══ -->
+  <div class="screen" id="screen-1">
+    <div class="card-header">
+      <div class="pillar-tag">Etapa 1 · Identificação</div>
+      <h1>Sobre você e sua empresa</h1>
+      <p>Essas informações contextualizam o diagnóstico e personalizam as recomendações.</p>
+    </div>
+    <div class="card-body">
+      <div class="form-section-label">Seus dados</div>
+      <div class="form-group">
+        <label>Nome completo *</label>
+        <input type="text" id="lead-name" placeholder="Seu nome completo" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>E-mail *</label>
+          <input type="email" id="lead-email" placeholder="seu@email.com" />
+        </div>
+        <div class="form-group">
+          <label>WhatsApp *</label>
+          <input type="tel" id="lead-phone" placeholder="(00) 00000-0000" />
+        </div>
+      </div>
+
+      <div class="form-section-label">Dados da empresa</div>
+      <div class="form-group">
+        <label>Nome da empresa *</label>
+        <input type="text" id="company-name" placeholder="Ex: Empresa X" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Faturamento anual aproximado</label>
+          <select id="company-revenue">
+            <option value="">Selecione...</option>
+            <option>Até R$ 500 mil</option>
+            <option>R$ 500 mil a R$ 2 mi</option>
+            <option>R$ 2 mi a R$ 10 mi</option>
+            <option>R$ 10 mi a R$ 50 mi</option>
+            <option>Acima de R$ 50 mi</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número de colaboradores</label>
+          <select id="company-size">
+            <option value="">Selecione...</option>
+            <option>1 a 5</option><option>6 a 20</option><option>21 a 50</option><option>51 a 200</option><option>Mais de 200</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="consent-block">
+        <input type="checkbox" id="lgpd-consent">
+        <label for="lgpd-consent">
+          Concordo que a Trevi armazene e utilize meus dados pessoais (nome, e-mail, telefone e dados da empresa) para entrar em contato com base neste diagnóstico, de acordo com a
+          <button type="button" class="privacy-link" onclick="openPrivacy()">Política de Privacidade</button>.
+        </label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goTo(0)">Voltar</button>
+        <button class="btn btn-primary" onclick="validateInfo()">Próximo: Direção</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 2: Direção ══ -->
+  <div class="screen" id="screen-2">
+    <div class="card-header">
+      <div class="pillar-tag">Pilar 1 de 3 · Direção</div>
+      <h1>Direção</h1>
+      <p>Clareza estratégica, precificação com base em dados e capacidade de crescer sem depender de uma única pessoa.</p>
+    </div>
+    <div class="card-body" id="questions-direcao"></div>
+  </div>
+
+  <!-- ══ SCREEN 3: Pessoas ══ -->
+  <div class="screen" id="screen-3">
+    <div class="card-header">
+      <div class="pillar-tag">Pilar 2 de 3 · Pessoas</div>
+      <h1>Pessoas</h1>
+      <p>Time de alta performance, padrões de atendimento, comunicação interna e rituais de gestão que retêm e desenvolvem talentos.</p>
+    </div>
+    <div class="card-body" id="questions-pessoas"></div>
+  </div>
+
+  <!-- ══ SCREEN 4: Operação ══ -->
+  <div class="screen" id="screen-4">
+    <div class="card-header">
+      <div class="pillar-tag">Pilar 3 de 3 · Operação</div>
+      <h1>Operação</h1>
+      <p>Retenção de clientes, monetização da base existente, processos documentados e previsibilidade de caixa.</p>
+    </div>
+    <div class="card-body" id="questions-operacao"></div>
+  </div>
+
+  <!-- ══ SCREEN 5: Results ══ -->
+  <div class="screen" id="screen-5">
+    <div class="results-header">
+      <div class="company-badge" id="company-badge">Empresa</div>
+      <h1>Diagnóstico Empresarial Trevi</h1>
+      <p id="results-date"></p>
+    </div>
+    <div class="card-body">
+
+      <div class="score-overview">
+        <div class="gauge-wrap">
+          <canvas id="gaugeChart" width="180" height="180"></canvas>
+          <div class="gauge-label">
+            <div class="gauge-score" id="total-score">0</div>
+            <div class="gauge-max">de 100 pontos</div>
+            <div class="gauge-status" id="status-label"></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title" style="margin-bottom:16px;">Score por Pilar</div>
+          <div class="pillars-grid" id="pillar-results"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-title">Visão Geral dos Pilares</div>
+      <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
+
+      <div class="divider"></div>
+      <div class="section-title">Principais Bloqueadores de Crescimento</div>
+      <div class="blockers-list" id="blockers-list"></div>
+
+      <div class="divider"></div>
+      <div class="section-title">Próximos Passos Recomendados</div>
+      <div class="recs-grid" id="recs-grid"></div>
+
+      <div class="divider"></div>
+      <div style="background:var(--verde);border-radius:4px;padding:28px 32px;text-align:center;">
+        <p style="color:var(--verde-claro);font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;margin-bottom:10px;">Próximo passo</p>
+        <p style="color:var(--offwhite);font-family:'Cormorant',serif;font-size:22px;font-weight:600;line-height:1.3;margin-bottom:12px;">Quer transformar esse diagnóstico em um plano de ação concreto?</p>
+        <p style="color:var(--verde-claro);font-family:'Lora',serif;font-style:italic;font-size:13px;line-height:1.7;margin-bottom:24px;">A Trevi implementa os três pilares na sua empresa, desbloqueando os gargalos identificados aqui e acelerando o crescimento com margem real.</p>
+        <a href="https://wa.me/5522997697004?text=Ol%C3%A1%2C%20quero%20saber%20mais%20como%20a%20Trevi%20pode%20me%20ajudar." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:10px;background:var(--offwhite);color:var(--verde);font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:14px 28px;border-radius:6px;transition:all 0.2s;" onmouseover="this.style.background='var(--verde-claro)'" onmouseout="this.style.background='var(--offwhite)'" onclick="dbUpdateDiag(currentDiagId,{status:'whatsapp_clicado'})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Falar com a Trevi no WhatsApp
+        </a>
+      </div>
+
+    </div>
+    <div class="footer-actions">
+      <button class="btn btn-secondary" onclick="window.print()">Imprimir / Salvar PDF</button>
+      <button class="btn btn-primary" onclick="restart()">Refazer diagnóstico</button>
+    </div>
+  </div>
+
+</div></main>
+
+<!-- ══ PRIVACY MODAL ══ -->
+<div class="modal-overlay" id="privacy-modal">
+  <div class="modal-box">
+    <h2>Política de Privacidade</h2>
+    <p class="modal-sub">Trevi · Última atualização: maio de 2026</p>
+
+    <div class="modal-section">
+      <h3>Quem somos</h3>
+      <p>A <strong>Trevi</strong> é uma consultoria especializada em eficiência operacional, representada por <strong>Ramon Saldanha</strong> (ramons.azevedo@gmail.com). Somos os responsáveis pelo tratamento dos dados coletados neste formulário.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Quais dados coletamos</h3>
+      <ul>
+        <li>Nome completo</li>
+        <li>Endereço de e-mail</li>
+        <li>Número de telefone / WhatsApp</li>
+        <li>Nome da empresa, faturamento estimado e número de colaboradores</li>
+        <li>Respostas do diagnóstico empresarial (15 perguntas em escala de 1 a 5)</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h3>Para que usamos seus dados</h3>
+      <ul>
+        <li>Entrar em contato para apresentar os resultados do diagnóstico</li>
+        <li>Enviar recomendações personalizadas com base nas respostas</li>
+        <li>Oferecer produtos e serviços da Trevi alinhados ao perfil identificado</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h3>Base legal (LGPD, art. 7º)</h3>
+      <p>O tratamento dos seus dados é realizado com base no seu <strong>consentimento explícito</strong>, conforme o inciso I do art. 7º da Lei Geral de Proteção de Dados (Lei 13.709/2018). Você pode revogar esse consentimento a qualquer momento.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Compartilhamento de dados</h3>
+      <p>Seus dados não são vendidos, compartilhados ou transferidos a terceiros sem o seu consentimento, exceto quando exigido por lei ou ordem judicial.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Prazo de armazenamento</h3>
+      <p>Seus dados serão armazenados por até <strong>24 meses</strong> a partir da data de preenchimento, salvo solicitação de exclusão anterior.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Seus direitos como titular</h3>
+      <p>De acordo com a LGPD, você tem direito a:</p>
+      <ul>
+        <li>Confirmar a existência de tratamento dos seus dados</li>
+        <li>Acessar os dados que temos sobre você</li>
+        <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
+        <li>Solicitar a exclusão dos seus dados</li>
+        <li>Revogar o consentimento dado neste formulário</li>
+      </ul>
+      <p style="margin-top:10px;">Para exercer qualquer desses direitos, envie um e-mail para <strong>ramons.azevedo@gmail.com</strong> com o assunto "LGPD: Solicitação de Titular".</p>
+    </div>
+
+    <button class="modal-close" onclick="closePrivacy()">Fechar</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  SUPABASE
+// ══════════════════════════════════════════════
+const SUPA_URL = 'https://ioegepsixxbbdnjjazvp.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvZWdlcHNpeHhiYmRuamphenZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDM2MjMsImV4cCI6MjA5NDIxOTYyM30.xn5oX44qFBF7CWrPB0JvkIHDJiy7sF45gY1qE4KdqgY';
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ID do registro atual — preenchido após insert do lead
+let currentDiagId = null;
+
+async function dbInsertLead(data) {
+  try {
+    const { data: row, error } = await supabase
+      .from('diagnosticos')
+      .insert([data])
+      .select('id')
+      .single();
+    if (error) { console.error('Supabase insert error:', error); return null; }
+    return row.id;
+  } catch(e) { console.error('Supabase insert exception:', e); return null; }
+}
+
+async function dbUpdateDiag(id, data) {
+  if (!id) return;
+  try {
+    const { error } = await supabase
+      .from('diagnosticos')
+      .update(data)
+      .eq('id', id);
+    if (error) console.error('Supabase update error:', error);
+  } catch(e) { console.error('Supabase update exception:', e); }
+}
+
+// ══════════════════════════════════════════════
+//  QUESTIONS
+// ══════════════════════════════════════════════
+const QUESTIONS = {
+  direcao: [
+    {
+      text: "A empresa tem uma visão de 3 a 5 anos claramente definida e um plano anual com metas mensuráveis comunicadas ao time?",
+      sub: "Visão Estratégica e Planejamento",
+      key: "d1"
+    },
+    {
+      text: "A empresa seria vendável hoje? O negócio funciona e cresce sem depender exclusivamente do fundador ou de uma única pessoa?",
+      sub: "Independência do Negócio",
+      key: "d2"
+    },
+    {
+      text: "As decisões de precificação são baseadas em dados de LTV, CAC e margem, e a empresa testa ativamente diferentes pontos de preço?",
+      sub: "Precificação Estratégica",
+      key: "d3"
+    },
+    {
+      text: "A liderança transmite clareza de direção, gera engajamento genuíno no time e toma decisões com base em evidências, não apenas intuição?",
+      sub: "Liderança e Tomada de Decisão",
+      key: "d4"
+    },
+    {
+      text: "A empresa sabe priorizar com clareza e dizer não para iniciativas que não estão alinhadas com a estratégia principal?",
+      sub: "Foco e Priorização",
+      key: "d5"
+    }
+  ],
+  pessoas: [
+    {
+      text: "O time de atendimento tem um padrão documentado de qualidade, com critérios claros de resposta, resolução e postura com o cliente?",
+      sub: "Padrão de Atendimento ao Cliente",
+      key: "p1"
+    },
+    {
+      text: "As equipes de Vendas, Marketing e Customer Success se reúnem regularmente para revisar chamadas e alinhar a experiência do cliente de ponta a ponta?",
+      sub: "Alinhamento entre Times",
+      key: "p2"
+    },
+    {
+      text: "A comunicação interna do time é ágil, distribuída e com alta energia, engajamento e colaboração entre as áreas?",
+      sub: "Comunicação Interna e Produtividade",
+      key: "p3"
+    },
+    {
+      text: "Cada colaborador planeja sua semana com clareza e o gestor tem visibilidade total do que cada um está trabalhando?",
+      sub: "Planejamento Semanal e Transparência",
+      key: "p4"
+    },
+    {
+      text: "A política de crescimento de carreira e aumentos salariais é transparente, documentada e conhecida por todos os colaboradores?",
+      sub: "Remuneração e Retenção de Talentos",
+      key: "p5"
+    }
+  ],
+  operacao: [
+    {
+      text: "A empresa conhece a ação específica que diferencia os clientes que ficam por mais tempo dos que cancelam logo após a contratação?",
+      sub: "Ativação de Clientes",
+      key: "o1"
+    },
+    {
+      text: "O onboarding de novos clientes é estruturado, personalizado e focado em levá-los ao primeiro resultado o mais rápido possível?",
+      sub: "Onboarding e Tempo de Resultado",
+      key: "o2"
+    },
+    {
+      text: "A empresa monitora ativamente o churn e tem um processo formal de entrevista de saída para tentar recuperar clientes antes que saiam?",
+      sub: "Gestão de Churn e Retenção",
+      key: "o3"
+    },
+    {
+      text: "Existe uma estratégia estruturada de LTV que inclui vendas adicionais, vendas cruzadas, pagamento anual e ofertas premium para a base existente?",
+      sub: "Lifetime Value e Monetização da Base",
+      key: "o4"
+    },
+    {
+      text: "A empresa tem processos críticos documentados, indicadores acompanhados regularmente e fluxo de caixa previsível, operando sem dependência de pessoas-chave?",
+      sub: "Processos, Indicadores e Escalabilidade",
+      key: "o5"
+    }
+  ]
+};
+
+const SCALE = [
+  { value: 1, label: "Discordo\ntotalmente" },
+  { value: 2, label: "Discordo\nparcialmente" },
+  { value: 3, label: "Neutro" },
+  { value: 4, label: "Concordo\nparcialmente" },
+  { value: 5, label: "Concordo\ntotalmente" }
+];
+
+const ANSWERS = {};
+let currentScreen = 0;
+
+// ══════════════════════════════════════════════
+//  RENDER QUESTIONS
+// ══════════════════════════════════════════════
+function renderQuestions(pillar, containerId, prevScreen, nextLabel, nextFn) {
+  const container = document.getElementById(containerId);
+  const qs = QUESTIONS[pillar];
+  let html = '';
+  qs.forEach((q, i) => {
+    html += `<div class="question-block">
+      <div class="q-number">Pergunta ${i+1} de ${qs.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-sub">${q.sub}</div>
+      <div class="likert">`;
+    SCALE.forEach(s => {
+      html += `<input type="radio" name="${q.key}" id="${q.key}_${s.value}" value="${s.value}" onchange="ANSWERS['${q.key}']=parseInt(this.value)">
+        <label for="${q.key}_${s.value}"><span class="score-num">${s.value}</span>${s.label}</label>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `<div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(${prevScreen})">Voltar</button>
+    <button class="btn btn-primary" onclick='${nextFn}'>${nextLabel}</button>
+  </div>`;
+  container.innerHTML = html;
+}
+
+renderQuestions('direcao',  'questions-direcao',  1, 'Próximo: Pessoas',  'validatePillar(["d1","d2","d3","d4","d5"], 3)');
+renderQuestions('pessoas',  'questions-pessoas',  2, 'Próximo: Operação', 'validatePillar(["p1","p2","p3","p4","p5"], 4)');
+renderQuestions('operacao', 'questions-operacao', 3, 'Ver Diagnóstico',   'validatePillar(["o1","o2","o3","o4","o5"], 5)');
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+const STEP_LABELS = ['Boas-vindas','Identificação','Direção','Pessoas','Operação'];
+function goTo(n) {
+  document.getElementById('screen-' + currentScreen).classList.remove('active');
+  currentScreen = n;
+  document.getElementById('screen-' + n).classList.add('active');
+  const pw = document.getElementById('progress-wrap');
+  if (n === 0 || n === 5) {
+    pw.style.display = 'none';
+  } else {
+    pw.style.display = 'flex';
+    const pct = Math.round(((n-1) / 4) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('progress-label').textContent = `Etapa ${n} de 4 · ${STEP_LABELS[n]}`;
+  }
+  if (n === 5) { pw.style.display = 'none'; buildResults(); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function validateInfo() {
+  const name    = document.getElementById('lead-name').value.trim();
+  const email   = document.getElementById('lead-email').value.trim();
+  const phone   = document.getElementById('lead-phone').value.trim();
+  const company = document.getElementById('company-name').value.trim();
+  const revenue = document.getElementById('company-revenue').value;
+  const size    = document.getElementById('company-size').value;
+  const consent = document.getElementById('lgpd-consent').checked;
+  if (!name || !email || !phone || !company) {
+    alert('Por favor, preencha os campos obrigatórios: nome, e-mail, WhatsApp e nome da empresa.');
+    return;
+  }
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailOk) {
+    alert('Por favor, informe um e-mail válido.');
+    return;
+  }
+  if (!consent) {
+    alert('Para continuar, é necessário aceitar a Política de Privacidade.');
+    return;
+  }
+  // Inserir lead no Supabase (não bloqueia a navegação se falhar)
+  currentDiagId = await dbInsertLead({
+    nome:         name,
+    email:        email,
+    whatsapp:     phone,
+    empresa:      company,
+    faturamento:  revenue || null,
+    colaboradores: size || null,
+    lgpd_consent: true,
+    status:       'lead_capturado'
+  });
+  goTo(2);
+}
+
+function openPrivacy() {
+  document.getElementById('privacy-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePrivacy() {
+  document.getElementById('privacy-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Close modal when clicking overlay
+document.getElementById('privacy-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePrivacy();
+});
+
+function validatePillar(keys, next) {
+  const missing = keys.filter(k => ANSWERS[k] === undefined);
+  if (missing.length > 0) {
+    alert(`Por favor, responda todas as ${keys.length} perguntas antes de continuar.`);
+    return;
+  }
+  goTo(next);
+}
+
+// ══════════════════════════════════════════════
+//  SVG ICONS (line style — Lucide)
+// ══════════════════════════════════════════════
+const IC = {
+  target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  link:   '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  dollar: '<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  crown:  '<svg viewBox="0 0 24 24"><path d="M2 20h20M5 20V10l7-7 7 7v10"/></svg>',
+  focus:  '<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+  star:   '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  users:  '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  msg:    '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  cal:    '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  chart:  '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  key:    '<svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+  rocket: '<svg viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>',
+  bucket: '<svg viewBox="0 0 24 24"><path d="M20 7H4"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>',
+  money:  '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>',
+  proc:   '<svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+};
+
+// ══════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════
+function pillarScore(keys) { return keys.reduce((s, k) => s + (ANSWERS[k] || 0), 0); }
+
+function buildResults() {
+  const dScore = pillarScore(['d1','d2','d3','d4','d5']);
+  const pScore = pillarScore(['p1','p2','p3','p4','p5']);
+  const oScore = pillarScore(['o1','o2','o3','o4','o5']);
+  // Pesos por pilar: Direção 40%, Pessoas 30%, Operação 30%
+  const dPct = Math.round((dScore / 25) * 100);
+  const pPct = Math.round((pScore / 25) * 100);
+  const oPct = Math.round((oScore / 25) * 100);
+  const totalPct = Math.round(dPct * 0.40 + pPct * 0.30 + oPct * 0.30);
+
+  const cname = document.getElementById('company-name').value.trim();
+  document.getElementById('company-badge').textContent = cname;
+  document.getElementById('results-date').textContent =
+    'Diagnóstico realizado em ' + new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('total-score').textContent = totalPct;
+
+  let statusColor, statusText;
+  if (totalPct >= 80)      { statusColor = '#16a34a'; statusText = 'Negócio Saudável'; }
+  else if (totalPct >= 60) { statusColor = '#d97706'; statusText = 'Em Desenvolvimento'; }
+  else if (totalPct >= 40) { statusColor = '#ea580c'; statusText = 'Atenção Necessária'; }
+  else                     { statusColor = '#dc2626'; statusText = 'Estado Crítico'; }
+
+  // Atualizar registro no Supabase com scores e respostas
+  dbUpdateDiag(currentDiagId, {
+    status:        'concluido',
+    score_direcao: dPct,
+    score_pessoas: pPct,
+    score_operacao: oPct,
+    score_total:   totalPct,
+    classificacao: statusText,
+    respostas:     { ...ANSWERS },
+    concluido_em:  new Date().toISOString()
+  });
+
+  const sl = document.getElementById('status-label');
+  sl.textContent = statusText;
+  sl.style.color = statusColor;
+
+  new Chart(document.getElementById('gaugeChart'), {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [totalPct, 100 - totalPct],
+        backgroundColor: [statusColor, '#EDE8E0'],
+        borderWidth: 0,
+        circumference: 270,
+        rotation: -135
+      }]
+    },
+    options: {
+      cutout: '75%',
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { duration: 1200 }
+    }
+  });
+
+  const pillars = [
+    { name: 'Direção',  pct: dPct, color: '#1A3A2A', weight: '40%' },
+    { name: 'Pessoas',  pct: pPct, color: '#2E5E42', weight: '30%' },
+    { name: 'Operação', pct: oPct, color: '#4A7C5F', weight: '30%' }
+  ];
+  document.getElementById('pillar-results').innerHTML = pillars.map(p => `
+    <div class="pillar-result" style="border-color:${p.color}44;">
+      <div class="pr-name">${p.name}</div>
+      <div class="weight-badge">Peso: ${p.weight}</div>
+      <div class="pr-score" style="margin-top:6px;">${p.pct}<span class="pr-max">%</span></div>
+      <div class="pr-bar-bg"><div class="pr-bar-fill" style="width:${p.pct}%;background:${p.color};"></div></div>
+    </div>`).join('');
+
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Direção','Pessoas','Operação'],
+      datasets: [{
+        label: 'Score',
+        data: [dPct, pPct, oPct],
+        backgroundColor: 'rgba(26,58,42,0.1)',
+        borderColor: '#1A3A2A',
+        borderWidth: 2,
+        pointBackgroundColor: '#1A3A2A',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 20, font: { size: 10 } },
+          pointLabels: { font: { size: 13, weight: '700' } },
+          grid: { color: '#EDE8E0' }
+        }
+      },
+      plugins: { legend: { display: false } },
+      animation: { duration: 1200 }
+    }
+  });
+
+  buildBlockers();
+  buildRecs();
+}
+
+// ══════════════════════════════════════════════
+//  BLOCKERS
+// ══════════════════════════════════════════════
+function buildBlockers() {
+  const allItems = [
+    { key:'d1', pillar:'Direção',  icon: IC.target,
+      title: 'Empresa sem visão de longo prazo e metas claras',
+      text:  'Sem uma visão de 3 anos e metas anuais concretas, o time opera no automático, apagando incêndios em vez de avançar estrategicamente.' },
+    { key:'d2', pillar:'Direção',  icon: IC.link,
+      title: 'Negócio totalmente dependente do fundador',
+      text:  'Se o fundador parasse amanhã, a empresa pararia junto. Isso não é um negócio: é um emprego. O negócio precisa funcionar sem ele na operação diária.' },
+    { key:'d3', pillar:'Direção',  icon: IC.dollar,
+      title: 'Precificação sem base em dados de LTV e margem',
+      text:  'Muitos empresários precificam por intuição ou medo. Um aumento de 20% no preço com 10% menos conversão pode dobrar o lucro líquido.' },
+    { key:'d4', pillar:'Direção',  icon: IC.crown,
+      title: 'Liderança que não engaja o time na estratégia',
+      text:  'Sem liderança clara que conecta o time ao propósito maior, os melhores colaboradores se desengajam e os resultados sofrem.' },
+    { key:'d5', pillar:'Direção',  icon: IC.focus,
+      title: 'A empresa tenta resolver tudo ao mesmo tempo',
+      text:  'Identificar a alavanca principal, o único grande bloqueador que, se removido, move tudo. Tentar resolver tudo ao mesmo tempo garante que nada avance.' },
+    { key:'p1', pillar:'Pessoas',  icon: IC.star,
+      title: 'Sem padrão documentado de atendimento ao cliente',
+      text:  'Cada colaborador atende de um jeito diferente. Sem critérios claros de qualidade, a experiência do cliente varia e o NPS despenca.' },
+    { key:'p2', pillar:'Pessoas',  icon: IC.users,
+      title: 'Times de Vendas, Marketing e CS operam em silos',
+      text:  'Quando os times não se alinham regularmente, o cliente recebe uma experiência fragmentada e a empresa perde receita que já estava no funil.' },
+    { key:'p3', pillar:'Pessoas',  icon: IC.msg,
+      title: 'Comunicação interna lenta, centralizada e de baixa energia',
+      text:  'Pesquisas do MIT mostram que padrões de comunicação explicam 40% da variância de produtividade entre times.' },
+    { key:'p4', pillar:'Pessoas',  icon: IC.cal,
+      title: 'Time sem planejamento semanal estruturado',
+      text:  'Sem um ritual de planejamento semanal, o time reage ao caos em vez de executar prioridades. O gestor não sabe quem está sobrecarregado.' },
+    { key:'p5', pillar:'Pessoas',  icon: IC.chart,
+      title: 'Política de remuneração opaca gera drama e rotatividade',
+      text:  'As pessoas falam sobre salário. Sem uma política transparente, a empresa perde os melhores por subpagamento ou desperdiça com quem não entrega.' },
+    { key:'o1', pillar:'Operação', icon: IC.key,
+      title: 'Não sabe o que faz o cliente ficar ou sair',
+      text:  'Sem conhecer o ponto de ativação, a ação que separa quem permanece de quem cancela, toda estratégia de retenção é baseada em suposição.' },
+    { key:'o2', pillar:'Operação', icon: IC.rocket,
+      title: 'Onboarding de clientes genérico ou inexistente',
+      text:  'Um onboarding personalizado que leva o cliente ao primeiro resultado em até 30 dias pode reduzir o churn de 8% para 3%. Genérico não funciona.' },
+    { key:'o3', pillar:'Operação', icon: IC.bucket,
+      title: 'Alta evasão de clientes sem processo de resgate',
+      text:  'Reduzir o churn de 10% para 3% aumenta o LTV em mais de 3 vezes. Sem entrevistas de saída, a empresa perde metade dos clientes que poderia recuperar.' },
+    { key:'o4', pillar:'Operação', icon: IC.money,
+      title: 'Base de clientes existente não está sendo monetizada',
+      text:  'A maioria das empresas tem receita represada na própria base. Ofertas premium para 10% dos clientes atuais podem dobrar a receita sem custo de aquisição.' },
+    { key:'o5', pillar:'Operação', icon: IC.proc,
+      title: 'Operação sem processos documentados, indicadores e previsibilidade',
+      text:  'Receita é vaidade. Margem é sanidade. Caixa é realidade. Sem processos documentados e fluxo previsível, a empresa vive no limite e não consegue crescer com estrutura.' }
+  ];
+
+  const scored = allItems
+    .map(item => ({ ...item, score: ANSWERS[item.key] || 0 }))
+    .sort((a, b) => a.score - b.score);
+  const toShow = scored.slice(0, 6);
+
+  document.getElementById('blockers-list').innerHTML = toShow.map(item => {
+    let cls, badge, badgeColor;
+    if (item.score <= 2)       { cls = 'critical'; badge = 'Crítico'; badgeColor = '#dc2626'; }
+    else if (item.score === 3) { cls = 'warning';  badge = 'Atenção'; badgeColor = '#d97706'; }
+    else                       { cls = 'ok';       badge = 'Estável'; badgeColor = '#1A3A2A'; }
+    return `<div class="blocker-item ${cls}">
+      <div class="blocker-icon">${item.icon}</div>
+      <div class="blocker-text">
+        <h4>${item.title}
+          <span class="blocker-badge" style="color:${badgeColor};">${badge} · ${item.pillar}</span>
+        </h4>
+        <p>${item.text}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  RECOMMENDATIONS
+// ══════════════════════════════════════════════
+function buildRecs() {
+  const recs = [];
+  const C = { D: '#1A3A2A', P: '#2E5E42', O: '#4A7C5F' };
+
+  if (ANSWERS.d1 <= 3) recs.push({ pillar:'Direção',  color:C.D, title:'Criar visão de 3 anos e metas anuais', text:'Reserve um dia com a liderança para definir a visão de longo prazo e os 3 a 5 objetivos estratégicos do próximo ano, com métricas de sucesso claras.' });
+  if (ANSWERS.d2 <= 3) recs.push({ pillar:'Direção',  color:C.D, title:'Tornar o negócio independente do fundador', text:'Mapeie quais processos dependem exclusivamente de você. Documente-os, delegue-os e construa uma estrutura que funciona sem você na operação diária.' });
+  if (ANSWERS.d3 <= 3) recs.push({ pillar:'Direção',  color:C.D, title:'Testar aumento de preço entre 20% e 50%', text:'Calcule seu LTV atual por cliente e teste um aumento de preço. Na maioria dos casos, fechar 20% menos clientes com preço 50% maior resulta em mais lucro.' });
+  if (ANSWERS.d4 <= 3) recs.push({ pillar:'Direção',  color:C.D, title:'Criar rituais semanais de alinhamento estratégico', text:'Implemente um ritual semanal de comunicação da estratégia para o time, com planejamento estruturado e visibilidade do que cada área está priorizando.' });
+  if (ANSWERS.d5 <= 3) recs.push({ pillar:'Direção',  color:C.D, title:'Identificar e atacar a alavanca principal', text:'Encontre o único grande bloqueador que, se removido, move tudo. Resista à tentação de resolver tudo ao mesmo tempo. Foco é a alavanca mais subutilizada.' });
+
+  if (ANSWERS.p1 <= 3) recs.push({ pillar:'Pessoas',  color:C.P, title:'Documentar e treinar padrão de atendimento', text:'Crie critérios claros de qualidade para cada etapa da jornada do cliente. Documente, treine o time e meça o NPS após cada interação.' });
+  if (ANSWERS.p2 <= 3) recs.push({ pillar:'Pessoas',  color:C.P, title:'Lançar reunião semanal de revisão entre times', text:'Uma reunião de 60 a 90 minutos com Vendas, Marketing e CS para revisar chamadas juntos. Uma das iniciativas com maior retorno operacional que existe.' });
+  if (ANSWERS.p3 <= 3) recs.push({ pillar:'Pessoas',  color:C.P, title:'Elevar energia, engajamento e colaboração do time', text:'Meça o nível de energia, engajamento e colaboração no seu time. Crie projetos interfuncionais, reconhecimento sistemático e estrutura que favorece a comunicação.' });
+  if (ANSWERS.p4 <= 3) recs.push({ pillar:'Pessoas',  color:C.P, title:'Implementar planejamento semanal para todos', text:'Uma hora de planejamento toda segunda-feira economiza 10 a 12 horas no resto da semana. O gestor ganha visibilidade total de quem está sobrecarregado.' });
+  if (ANSWERS.p5 <= 3) recs.push({ pillar:'Pessoas',  color:C.P, title:'Criar e publicar a política de crescimento salarial', text:'Defina categorias de performance e os percentuais de aumento correspondentes. Distribua para o time. Isso retém talentos e elimina o drama de remuneração.' });
+
+  if (ANSWERS.o1 <= 3) recs.push({ pillar:'Operação', color:C.O, title:'Mapear o ponto de ativação dos clientes', text:'Analise os clientes com maior tempo de permanência. Encontre o que eles têm em comum e use isso para orientar o onboarding e filtrar novos contratos.' });
+  if (ANSWERS.o2 <= 3) recs.push({ pillar:'Operação', color:C.O, title:'Criar onboarding estruturado rumo ao primeiro resultado', text:'Desenhe um onboarding que leve o cliente ao resultado mais rápido possível. Personalizado e ao vivo supera genérico e gravado em qualquer contexto.' });
+  if (ANSWERS.o3 <= 3) recs.push({ pillar:'Operação', color:C.O, title:'Criar processo formal de resgate e retenção de clientes', text:'Implemente entrevistas de saída, contatos proativos em momentos de risco e reuniões de cancelamento. É possível recuperar metade dos clientes em processo de saída.' });
+  if (ANSWERS.o4 <= 3) recs.push({ pillar:'Operação', color:C.O, title:'Criar oferta premium para a base existente', text:'Desenvolva uma oferta de alto valor para 5 a 10% da base atual. Zero custo de aquisição, margens superiores. Repita a cada trimestre.' });
+  if (ANSWERS.o5 <= 3) recs.push({ pillar:'Operação', color:C.O, title:'Documentar processos e implementar indicadores semanais', text:'Documente os 5 processos mais críticos da operação. Escolha 5 indicadores e revise-os semanalmente. Previsibilidade de caixa começa por aí.' });
+
+  const toShow = recs.slice(0, 6);
+  document.getElementById('recs-grid').innerHTML = toShow.map(r => `
+    <div class="rec-card">
+      <div class="rec-pillar" style="color:${r.color}">${r.pillar}</div>
+      <h4>${r.title}</h4>
+      <p>${r.text}</p>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  RESTART
+// ══════════════════════════════════════════════
+function restart() {
+  Object.keys(ANSWERS).forEach(k => delete ANSWERS[k]);
+  currentDiagId = null;
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  ['lead-name','lead-email','lead-phone','company-name','company-revenue','company-size'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const consent = document.getElementById('lgpd-consent');
+  if (consent) consent.checked = false;
+  goTo(0);
+}
+</script>
+</body>
+</html>
