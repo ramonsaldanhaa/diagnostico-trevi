@@ -828,18 +828,18 @@
 // ══════════════════════════════════════════════
 const SUPA_URL = 'https://ioegepsixxbbdnjjazvp.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvZWdlcHNpeHhiYmRuamphenZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDM2MjMsImV4cCI6MjA5NDIxOTYyM30.xn5oX44qFBF7CWrPB0JvkIHDJiy7sF45gY1qE4KdqgY';
-let supabase = null;
+let supaClient = null;
 try {
-  if (window.supabase) supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  if (window.supabase) supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 } catch(e) { console.warn('Supabase init falhou:', e); }
 
 // ID do registro atual — preenchido após insert do lead
 let currentDiagId = null;
 
 async function dbInsertLead(data) {
-  if (!supabase) return null;
+  if (!supaClient) return null;
   try {
-    const { data: row, error } = await supabase
+    const { data: row, error } = await supaClient
       .from('diagnosticos')
       .insert([data])
       .select('id')
@@ -850,9 +850,9 @@ async function dbInsertLead(data) {
 }
 
 async function dbUpdateDiag(id, data) {
-  if (!supabase || !id) return;
+  if (!supaClient || !id) return;
   try {
-    const { error } = await supabase
+    const { error } = await supaClient
       .from('diagnosticos')
       .update(data)
       .eq('id', id);
