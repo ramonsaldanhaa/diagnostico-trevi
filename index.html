@@ -527,71 +527,65 @@
     .card { box-shadow: none; max-width: 100%; border: none; }
   }
   @media (max-width: 600px) {
-    /* ── Header compacto ── */
-    header { padding: 10px 16px; gap: 10px; justify-content: center; }
+    /* ── Sem overflow horizontal (previne zoom indesejado) ── */
+    html, body { overflow-x: hidden; }
+    * { max-width: 100%; }
+
+    /* ── Header ── */
+    header { padding: 10px 16px; justify-content: center; }
     .logo-img { height: 24px; }
 
-    /* ── Layout geral ── */
-    main { padding: 0; align-items: stretch; }
-    .card { border-radius: 0; border-left: none; border-right: none; border-bottom: none; box-shadow: none; }
-    .screen.active { min-height: calc(100vh - 52px); display: flex; flex-direction: column; }
-    #screen-0 .card-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; }
-    #screen-0 .btn-row { margin-top: auto; padding-top: 8px; }
-
-    /* ── Welcome: esconder texto descritivo nos pilares para ganhar espaço ── */
-    .pillar-card p { display: none; }
-    .pillar-card { padding: 12px 8px; }
-    .pillar-card h3 { margin-bottom: 0; }
-
-    /* ── Welcome: compactar card header ── */
-    #screen-0 .card-header { padding: 14px 16px 12px; }
-    #screen-0 .card-header h1 { font-size: 18px; line-height: 1.2; margin-bottom: 6px; }
-    #screen-0 .card-header p { font-size: 11px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-    /* ── Welcome: compactar texto e tempo estimado ── */
-    #screen-0 .card-body > p { font-size: 13px; line-height: 1.5; margin-bottom: 0; }
-    .time-estimate { margin-bottom: 0; }
+    /* ── Layout ── */
+    main { padding: 10px 10px 28px; align-items: stretch; }
 
     /* ── Card ── */
-    .card-header { padding: 16px 16px 12px; }
-    .card-header h1 { font-size: 20px; margin-bottom: 6px; }
-    .card-header p  { font-size: 12px; line-height: 1.4; }
+    .card-header { padding: 14px 16px 12px; }
+    .card-header h1 { font-size: 20px; line-height: 1.2; margin-bottom: 6px; }
+    .card-header p  { font-size: 11px; line-height: 1.4; }
     .pillar-tag     { font-size: 9px; padding: 3px 8px; margin-bottom: 8px; }
-    .card-body      { padding: 14px 16px; }
+    .card-body      { padding: 14px 16px 20px; }
 
-    /* ── Welcome: mantém 3 colunas mas bem compacto ── */
-    .welcome-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    /* ── Tela Inicial — Welcome ── */
+    #screen-0 .card-header h1 { font-size: 17px; }
+    #screen-0 .card-header p  { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .welcome-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
     .pillar-card  { padding: 10px 6px; }
+    .pillar-card p { display: none; }
+    .pillar-card h3 { font-size: 11px; margin-bottom: 0; }
     .pillar-icon  { margin-bottom: 6px; }
     .pillar-icon svg { width: 20px; height: 20px; }
-    .pillar-card h3 { font-size: 11px; margin-bottom: 4px; }
-    .pillar-card p  { font-size: 10px; line-height: 1.3; }
+    #screen-0 .card-body > p { font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
 
-    /* ── Botão ── */
+    /* ── Botões ── */
     .btn { padding: 12px 20px; font-size: 11px; }
     .btn-row { margin-top: 16px; }
 
-    /* ── Likert (opções de resposta) ── */
-    .likert { gap: 5px; }
-    .likert label { padding: 8px 3px; font-size: 8.5px; min-width: 0; }
-    .likert label .score-num { font-size: 18px; margin-bottom: 2px; }
+    /* ── Likert (opções 1-5) ── */
+    .likert { gap: 4px; flex-wrap: nowrap; }
+    .likert label { flex: 1; min-width: 0; padding: 8px 2px; font-size: 8px; text-align: center; line-height: 1.2; }
+    .likert label .score-num { font-size: 17px; margin-bottom: 1px; }
 
     /* ── Formulário ── */
     .form-row { grid-template-columns: 1fr; }
     .form-section-label { margin-top: 18px; margin-bottom: 12px; }
     .form-group { margin-bottom: 12px; }
 
-    /* ── Resultados ── */
-    .results-header { padding: 20px 16px 16px; }
-    .score-overview { grid-template-columns: 1fr; text-align: center; gap: 16px; margin-bottom: 16px; }
-    .gauge-wrap canvas { max-width: 140px; }
-    .gauge-label { margin-top: -32px; }
-    .gauge-score { font-size: 36px; }
-    .pillars-grid, .recs-grid { grid-template-columns: 1fr; }
-    .radar-wrap canvas { max-width: 100%; }
-    .section-title { font-size: 11px; }
+    /* ── Resultados: gauge centralizado ── */
+    .results-header { padding: 18px 16px 14px; }
+    .score-overview { grid-template-columns: 1fr; text-align: center; gap: 4px; margin-bottom: 16px; }
+    .gauge-wrap { display: flex; flex-direction: column; align-items: center; }
+    .gauge-wrap canvas { width: 140px !important; height: 140px !important; }
+    .gauge-label { margin-top: -38px; text-align: center; width: 140px; }
+    .gauge-score { font-size: 32px; }
+    .gauge-max   { font-size: 9px; }
+    .gauge-status { font-size: 10px; margin-top: 3px; }
 
-    /* ── Footer ── */
+    /* ── Resultados: pilares e recomendações ── */
+    .pillars-grid, .recs-grid { grid-template-columns: 1fr; }
+    .section-title { font-size: 11px; }
+    .radar-wrap { overflow: hidden; }
+
+    /* ── Footer de resultados ── */
     .footer-actions { flex-direction: column; padding: 14px 16px; gap: 8px; }
   }
 </style>
