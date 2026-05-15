@@ -535,7 +535,22 @@
     main { padding: 0; align-items: stretch; }
     .card { border-radius: 0; border-left: none; border-right: none; border-bottom: none; box-shadow: none; }
     .screen.active { min-height: calc(100vh - 52px); display: flex; flex-direction: column; }
-    #screen-0 .card-body { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    #screen-0 .card-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; }
+    #screen-0 .btn-row { margin-top: auto; padding-top: 8px; }
+
+    /* ── Welcome: esconder texto descritivo nos pilares para ganhar espaço ── */
+    .pillar-card p { display: none; }
+    .pillar-card { padding: 12px 8px; }
+    .pillar-card h3 { margin-bottom: 0; }
+
+    /* ── Welcome: compactar card header ── */
+    #screen-0 .card-header { padding: 14px 16px 12px; }
+    #screen-0 .card-header h1 { font-size: 18px; line-height: 1.2; margin-bottom: 6px; }
+    #screen-0 .card-header p { font-size: 11px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ── Welcome: compactar texto e tempo estimado ── */
+    #screen-0 .card-body > p { font-size: 13px; line-height: 1.5; margin-bottom: 0; }
+    .time-estimate { margin-bottom: 0; }
 
     /* ── Card ── */
     .card-header { padding: 16px 16px 12px; }
