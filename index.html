@@ -527,13 +527,26 @@
     .card { box-shadow: none; max-width: 100%; border: none; }
   }
   @media (max-width: 600px) {
-    /* ── Sem overflow horizontal (previne zoom indesejado) ── */
-    html, body { overflow-x: hidden; }
-    * { max-width: 100%; }
+    /* ── Sem overflow horizontal (previne zoom indesejado no iOS Safari) ── */
+    html {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+    }
+    body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+      position: relative;
+    }
+    * { max-width: 100%; box-sizing: border-box; }
+    canvas { max-width: 100% !important; }
 
-    /* ── Header ── */
+    /* ── Header & Progress ── */
     header { padding: 10px 16px; justify-content: center; }
     .logo-img { height: 24px; }
+    #progress-wrap { padding: 8px 16px; gap: 10px; }
+    .progress-label { font-size: 10px; }
 
     /* ── Layout ── */
     main { padding: 10px 10px 28px; align-items: stretch; }
@@ -561,9 +574,19 @@
     .btn-row { margin-top: 16px; }
 
     /* ── Likert (opções 1-5) ── */
-    .likert { gap: 4px; flex-wrap: nowrap; }
-    .likert label { flex: 1; min-width: 0; padding: 8px 2px; font-size: 8px; text-align: center; line-height: 1.2; }
-    .likert label .score-num { font-size: 17px; margin-bottom: 1px; }
+    .likert { gap: 4px; flex-wrap: nowrap; width: 100%; }
+    .likert label {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 20%;
+      padding: 8px 2px;
+      font-size: 7.5px;
+      text-align: center;
+      line-height: 1.2;
+      overflow: hidden;
+      word-break: break-word;
+    }
+    .likert label .score-num { font-size: 16px; margin-bottom: 1px; }
 
     /* ── Formulário ── */
     .form-row { grid-template-columns: 1fr; }
@@ -583,7 +606,8 @@
     /* ── Resultados: pilares e recomendações ── */
     .pillars-grid, .recs-grid { grid-template-columns: 1fr; }
     .section-title { font-size: 11px; }
-    .radar-wrap { overflow: hidden; }
+    .radar-wrap { overflow: hidden; width: 100%; max-width: 100%; }
+    .radar-wrap canvas { width: 100% !important; max-width: 100% !important; height: auto !important; }
 
     /* ── Footer de resultados ── */
     .footer-actions { flex-direction: column; padding: 14px 16px; gap: 8px; }
@@ -871,14 +895,14 @@ let currentDiagId = null;
 
 async function dbInsertLead(data) {
   if (!supaClient) return null;
+  // Gera UUID client-side para evitar dependência de SELECT policy no RLS
+  const id = crypto.randomUUID();
   try {
-    const { data: row, error } = await supaClient
+    const { error } = await supaClient
       .from('diagnosticos')
-      .insert([data])
-      .select('id')
-      .single();
+      .insert([{ id, ...data }]);
     if (error) { console.error('Supabase insert error:', error); return null; }
-    return row.id;
+    return id;
   } catch(e) { console.error('Supabase insert exception:', e); return null; }
 }
 
